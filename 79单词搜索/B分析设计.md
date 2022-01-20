@@ -27,7 +27,7 @@
           List<String> memoryList = new ArrayList<>();
           for (int i = 0; i < board.size(); i++){
               for (int j = 0; j < board[0].size(); j++){
-                  if (board[i][j].equals(word[0]) && existSub(i, j, board memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), word.subString(1))){
+                  if (board[i][j].equals(word[0]) && existSub(i, j, board, memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), word.subString(1))){
                       return true
                   }
               }
@@ -49,17 +49,65 @@
               return false;
           }
           
-          boolean a = existSub(i, j+1, board, memoryList.add(memoryList.contain(Integer.toString(i) + "," + Integer.toString(j))), subWord.subString(1));
-          boolean b = existSub(i+1, j, board, memoryList.add(memoryList.contain(Integer.toString(i) + "," + Integer.toString(j))), subWord.subString(1));
-          boolean c = existSub(i, j-1, board, memoryList.add(memoryList.contain(Integer.toString(i) + "," + Integer.toString(j))), subWord.subString(1));
-          boolean d = existSub(i-1, j, board, memoryList.add(memoryList.contain(Integer.toString(i) + "," + Integer.toString(j))), subWord.subString(1));
+          boolean a = existSub(i, j+1, board, memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), subWord.subString(1));
+          boolean b = existSub(i+1, j, board, memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), subWord.subString(1));
+          boolean c = existSub(i, j-1, board, memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), subWord.subString(1));
+          boolean d = existSub(i-1, j, board, memoryList.add(Integer.toString(i) + "," + Integer.toString(j)), subWord.subString(1));
           memoryList.removeLast();
           
-          return a || b || c || d
+          if(a || b || c || d){
+              return true;
+          }
+          return false;
       }
   }	
   ```
 
 * 上述代码中存在哪些问题？如何优化代码？
 
+  ```java
+  class Solution {
+      public boolean exist(char[][] board, String word) {
+          List<String> mList = new ArrayList<>();
+          int[][] arroundArray = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+          for (int i=0; i<board.length; i++){
+              for (int j=0; j < board[0].length; j++){
+                  if (board[i][j]==word.charAt(0)){
+                      mList.add(Integer.toString(i)+","+Integer.toString(j));
+                      for (int m = 0; m<arroundArray.length; m++){
+                          if(existSub(i+arroundArray[m][0], j+arroundArray[m][1], board, arroundArray, mList, word.substring(1))){
+                              return true;
+                          }
+                      }
+                  }
+              }
+          }
+          return false;
+      }
+  
+      private boolean existSub(int i, int j, char[][] board, int[][] arroundArray, List<String> memoryList, String subWord){
+          if (subWord.length()==0){
+              return true;
+          }
+          if (i < 0 || i > board.length-1 || j < 0 || j > board[0].length-1){
+              return false;
+          }
+          String s1 = Integer.toString(i)+","+Integer.toString(j);
+          if (board[i][j]!=subWord.charAt(0) || memoryList.contains(s1)){
+              return false;
+          }
+  
+          memoryList.add(Integer.toString(i)+","+Integer.toString(j));
+          for (int m = 0; m<arroundArray.length; m++){
+              if(existSub(i+arroundArray[m][0], j+arroundArray[m][1], board, arroundArray, memoryList, subWord.substring(1))){
+                  return true;
+              }
+          }
+          memoryList.remove(memoryList.size()-1);
+  
+          return false;
+      }
+  }
+  ```
+  
   
