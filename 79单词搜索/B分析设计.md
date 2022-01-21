@@ -110,4 +110,98 @@
   }
   ```
   
+* 上述代码在输入为：[["C","A","A"],["A","A","A"],["B","C","D"]] "AAB"时，输出为false，预期结果为true。问题出在哪里？如何修改代码？
+
+  ```java
+  //分析：在搜索完第一个字母周围的四个字母后，没有将记忆列表中的该元素删掉，当第一个字母周围四个字母都不匹配并移动至下一字母匹配时，导致该字母仍在记忆列表中，导致报错
+  class Solution {
+      public boolean exist(char[][] board, String word) {
+          List<String> mList = new ArrayList<>();
+          int[][] arroundArray = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+          for (int i=0; i<board.length; i++){
+              for (int j=0; j < board[0].length; j++){
+                  if (board[i][j]==word.charAt(0)){
+                      mList.add(Integer.toString(i)+","+Integer.toString(j));
+                      for (int m = 0; m<arroundArray.length; m++){
+                          if(existSub(i+arroundArray[m][0], j+arroundArray[m][1], board, arroundArray, mList, word.substring(1))){
+                              return true;
+                          }
+                      }
+                      //修改点：在该处将记忆列表中的元素删掉
+                      mList.remove(mList.size()-1);
+                  }
+              }
+          }
+          return false;
+      }
+  
+      private boolean existSub(int i, int j, char[][] board, int[][] arroundArray, List<String> memoryList, String subWord){
+          if (subWord.length()==0){
+              return true;
+          }
+          if (i < 0 || i > board.length-1 || j < 0 || j > board[0].length-1){
+              return false;
+          }
+          String s1 = Integer.toString(i)+","+Integer.toString(j);
+          if (board[i][j]!=subWord.charAt(0) || memoryList.contains(s1)){
+              return false;
+          }
+  
+          memoryList.add(Integer.toString(i)+","+Integer.toString(j));
+          for (int m = 0; m<arroundArray.length; m++){
+              if(existSub(i+arroundArray[m][0], j+arroundArray[m][1], board, arroundArray, memoryList, subWord.substring(1))){
+                  return true;
+              }
+          }
+          memoryList.remove(memoryList.size()-1);
+  
+          return false;
+      }
+  }
+  ```
+
+* 上述代码如何优化？
+
+  ```java
+  //优化点：可以将对首字母的判断移动到递归函数中，进一步精简代码
+  class Solution {
+      public boolean exist(char[][] board, String word) {
+          List<String> mList = new ArrayList<>();
+          int[][] arroundArray = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+          for (int i=0; i<board.length; i++){
+              for (int j=0; j < board[0].length; j++){
+                  if(existSub(i, j, board, arroundArray, mList, word)){
+                      return true;
+                  }
+              }
+          }
+          return false;
+      }
+  
+      private boolean existSub(int i, int j, char[][] board, int[][] arroundArray, List<String> memoryList, String subWord){
+          if (subWord.length()==0){
+              return true;
+          }
+          if (i < 0 || i > board.length-1 || j < 0 || j > board[0].length-1 || board[i][j]!=subWord.charAt(0)){
+              return false;
+          }
+  
+          String s1 = Integer.toString(i)+","+Integer.toString(j);
+          if (memoryList.contains(s1)){
+              return false;
+          }
+  
+          memoryList.add(s1);
+          for (int m = 0; m<arroundArray.length; m++){
+              if(existSub(i+arroundArray[m][0], j+arroundArray[m][1], board, arroundArray, memoryList, subWord.substring(1))){
+                  return true;
+              }
+          }
+          memoryList.remove(memoryList.size()-1);
+  
+          return false;
+      }
+  }
+  ```
+
   
